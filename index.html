@@ -14,7 +14,7 @@
        Abhi isay blank ("") rakha gaya hai.
   ========================================================================== -->
   <script>
-    window.PROFILE_PHOTO_URL = "DP.png";
+    window.PROFILE_PHOTO_URL = "";
   </script>
 
   <style>
@@ -829,41 +829,88 @@
         display: none !important;
       }
 
-      body {
+      html, body {
         background: #ffffff !important;
         color: #0f172a !important;
-        font-size: 9.5pt !important;
-        line-height: 1.4 !important;
+        font-size: 9pt !important;
+        line-height: 1.35 !important;
       }
 
+      /* Use block layout in print so Chrome/Edge never slices card borders across page breaks */
       .container {
+        display: block !important;
         max-width: 100% !important;
         padding: 0 !important;
-        gap: 10px !important;
       }
 
       .ios-card {
+        display: block !important;
         background: #ffffff !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         box-shadow: none !important;
         border: 1px solid #cbd5e1 !important;
-        border-radius: 12px !important;
+        border-radius: 14px !important;
         padding: 12px 15px !important;
-        break-inside: avoid;
+        margin-bottom: 12px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
       }
 
-      #experience.ios-card,
-      #competencies.ios-card {
-        break-inside: auto;
+      /* Push major sections cleanly to the top of the next page so top borders never get cut at the bottom of a page */
+      #competencies,
+      #experience,
+      #skills,
+      #education {
+        break-before: page !important;
+        page-break-before: always !important;
+      }
+
+      .timeline-list,
+      .edu-list {
+        display: block !important;
       }
 
       .exp-glass-item,
       .sub-group-block,
       .edu-item {
-        break-inside: avoid;
-        padding: 9px 12px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        padding: 8px 12px !important;
+        margin-bottom: 8px !important;
         box-shadow: none !important;
+      }
+
+      .exp-glass-item:last-child,
+      .sub-group-block:last-child,
+      .edu-item:last-child {
+        margin-bottom: 0 !important;
+      }
+
+      .exp-header {
+        margin-bottom: 5px !important;
+      }
+
+      .exp-role {
+        font-size: 9.6pt !important;
+      }
+
+      .exp-org {
+        font-size: 8.6pt !important;
+      }
+
+      .exp-bullets {
+        gap: 3px !important;
+      }
+
+      .exp-bullets li {
+        font-size: 8.6pt !important;
+        line-height: 1.32 !important;
+      }
+
+      .summary-text {
+        font-size: 9pt !important;
+        line-height: 1.45 !important;
       }
 
       .profile-photo-frame {
@@ -885,9 +932,14 @@
         font-size: 10.5pt !important;
       }
 
+      .sub-group-label {
+        margin-bottom: 5px !important;
+        font-size: 7.4pt !important;
+      }
+
       .modern-glass-box {
         padding: 3px 9px !important;
-        font-size: 8pt !important;
+        font-size: 7.9pt !important;
         box-shadow: none !important;
         border: 1px solid #94a3b8 !important;
         background: #f8fafc !important;
@@ -901,6 +953,7 @@
       .kpi-strip {
         grid-template-columns: repeat(4, 1fr) !important;
         gap: 6px !important;
+        margin-top: 8px !important;
       }
 
       .contact-widget,
@@ -912,6 +965,13 @@
       .two-col-grid {
         grid-template-columns: 1fr 1fr !important;
         gap: 10px !important;
+        margin-bottom: 12px !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .two-col-grid .ios-card {
+        margin-bottom: 0 !important;
       }
     }
 
@@ -954,7 +1014,6 @@
         <a href="#gulf-readiness" class="nav-link">Gulf Info</a>
       </div>
       <div class="nav-divider"></div>
-      </button>
       <button class="ios-btn" id="themeToggle" type="button" title="Switch Light / Dark Glass">
         <span id="themeIcon">🌙</span>
         <span id="themeLabel">Dark Glass</span>
@@ -1483,7 +1542,6 @@
     // 1. Profile Photo Loader (from window.PROFILE_PHOTO_URL or interactive input)
     const profilePhotoFrame = document.getElementById('profilePhotoFrame');
     const profilePhotoImg = document.getElementById('profilePhotoImg');
-    const photoDrawerBtn = document.getElementById('photoDrawerBtn');
     const photoDrawer = document.getElementById('photoDrawer');
     const photoUrlInput = document.getElementById('photoUrlInput');
     const applyPhotoBtn = document.getElementById('applyPhotoBtn');
@@ -1511,18 +1569,25 @@
       setProfilePhoto(window.PROFILE_PHOTO_URL);
     }
 
-    photoDrawerBtn.addEventListener('click', () => {
-      photoDrawer.classList.toggle('open');
-    });
+    if (profilePhotoFrame) {
+      profilePhotoFrame.style.cursor = 'pointer';
+      profilePhotoFrame.addEventListener('click', () => {
+        if (photoDrawer) photoDrawer.classList.toggle('open');
+      });
+    }
 
-    applyPhotoBtn.addEventListener('click', () => {
-      setProfilePhoto(photoUrlInput.value);
-    });
+    if (applyPhotoBtn) {
+      applyPhotoBtn.addEventListener('click', () => {
+        setProfilePhoto(photoUrlInput.value);
+      });
+    }
 
-    clearPhotoBtn.addEventListener('click', () => {
-      photoUrlInput.value = '';
-      setProfilePhoto('');
-    });
+    if (clearPhotoBtn) {
+      clearPhotoBtn.addEventListener('click', () => {
+        photoUrlInput.value = '';
+        setProfilePhoto('');
+      });
+    }
 
     // 2. iOS Theme Switcher (Light Glass <-> Dark Glass)
     const themeToggle = document.getElementById('themeToggle');
@@ -1531,22 +1596,27 @@
     const printBtn = document.getElementById('printBtn');
     const rootHtml = document.documentElement;
 
-    themeToggle.addEventListener('click', () => {
-      const current = rootHtml.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      rootHtml.setAttribute('data-theme', next);
-      if (next === 'dark') {
-        themeIcon.textContent = '☀️';
-        themeLabel.textContent = 'Light Glass';
-      } else {
-        themeIcon.textContent = '🌙';
-        themeLabel.textContent = 'Dark Glass';
-      }
-    });
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        const current = rootHtml.getAttribute('data-theme') || 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        rootHtml.setAttribute('data-theme', next);
+        if (next === 'dark') {
+          themeIcon.textContent = '☀️';
+          themeLabel.textContent = 'Light Glass';
+        } else {
+          themeIcon.textContent = '🌙';
+          themeLabel.textContent = 'Dark Glass';
+        }
+      });
+    }
 
-    printBtn.addEventListener('click', () => {
-      window.print();
-    });
+    if (printBtn) {
+      printBtn.addEventListener('click', () => {
+        window.focus();
+        window.print();
+      });
+    }
 
     // 3. Live Search Filter for Round Transparent Modern Boxes
     const skillSearch = document.getElementById('skillSearch');
